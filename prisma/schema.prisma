@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Essay {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  title       String
+  excerpt     String
+  coverImage  String
+  alt         String
+  content     String
+  date        DateTime
+  readingTime String
+  published   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  tags        TagsOnEssays[]
+  comments    Comment[]
+}
+
+model Tag {
+  id     String         @id @default(cuid())
+  name   String         @unique
+  essays TagsOnEssays[]
+}
+
+model TagsOnEssays {
+  essayId String
+  tagId   String
+  essay   Essay  @relation(fields: [essayId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([essayId, tagId])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  essayId    String
+  essay      Essay    @relation(fields: [essayId], references: [id], onDelete: Cascade)
+  authorName String
+  body       String
+  parentId   String?
+  createdAt  DateTime @default(now())
+}
