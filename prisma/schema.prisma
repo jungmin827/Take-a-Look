@@ -33,7 +33,7 @@ model TagsOnEssays {
   essayId String
   tagId   String
   essay   Essay  @relation(fields: [essayId], references: [id], onDelete: Cascade)
-  tag     Tag    @relation(fields: [tagId], references: [id])
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([essayId, tagId])
 }
