@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { serialize } from 'cookie'
+import { timingSafeEqual } from 'crypto'
 import { signAdminToken } from '@/lib/admin-auth'
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -9,7 +10,17 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const { password } = req.body
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
+  const adminPassword = process.env.ADMIN_PASSWORD ?? ''
+  let authorized = false
+  try {
+    authorized =
+      !!password &&
+      password.length === adminPassword.length &&
+      timingSafeEqual(Buffer.from(password), Buffer.from(adminPassword))
+  } catch {
+    authorized = false
+  }
+  if (!authorized) {
     return res.status(401).json({ error: '비밀번호가 틀렸습니다.' })
   }
 
