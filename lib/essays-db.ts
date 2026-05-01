@@ -59,7 +59,7 @@ export async function getRelatedEssays(slug: string, limit = 10): Promise<Essay[
     row: r,
     score: r.tags.filter(t => tagIds.includes(t.tagId)).length,
   }))
-  scored.sort((a, b) => b.score - a.score)
+  scored.sort((a, b) => b.score - a.score || b.row.date.getTime() - a.row.date.getTime())
 
   return scored.slice(0, limit).map(s => toEssay(s.row))
 }
