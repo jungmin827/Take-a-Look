@@ -18,26 +18,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'slug, title, content는 필수입니다.' })
     }
 
-    const essay = await prisma.essay.create({
-      data: {
-        slug,
-        title,
-        excerpt: excerpt ?? '',
-        coverImage: coverImage ?? '',
-        alt: alt ?? '',
-        content: typeof content === 'string' ? content : JSON.stringify(content),
-        date: date ? new Date(date) : new Date(),
-        readingTime: readingTime ?? '3분',
-        published: published ?? false,
-        tags: {
-          create: (tags ?? []).map((name: string) => ({
-            tag: { connectOrCreate: { where: { name }, create: { name } } },
-          })),
+    try {
+      const essay = await prisma.essay.create({
+        data: {
+          slug,
+          title,
+          excerpt: excerpt ?? '',
+          coverImage: coverImage ?? '',
+          alt: alt ?? '',
+          content: typeof content === 'string' ? content : JSON.stringify(content),
+          date: date ? new Date(date) : new Date(),
+          readingTime: readingTime ?? '3분',
+          published: published ?? false,
+          tags: {
+            create: (tags ?? []).map((name: string) => ({
+              tag: { connectOrCreate: { where: { name }, create: { name } } },
+            })),
+          },
         },
-      },
-    })
-
-    return res.status(201).json(essay)
+      })
+      return res.status(201).json(essay)
+    } catch (err: any) {
+      if (err?.code === 'P2002') {
+        return res.status(409).json({ error: '이미 존재하는 slug입니다.' })
+      }
+      console.error(err)
+      return res.status(500).json({ error: '글 생성에 실패했습니다.' })
+    }
   }
 
   res.setHeader('Allow', ['GET', 'POST'])
