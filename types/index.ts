@@ -1,10 +1,13 @@
 export interface Essay {
-  title: string
+  id: string
   slug: string
-  date: string
-  tags: string[]
+  title: string
   excerpt: string
   coverImage: string
   alt: string
+  content: string   // JSON string (Tiptap doc)
+  date: string      // ISO string
   readingTime: string
+  published: boolean
+  tags: string[]
 }

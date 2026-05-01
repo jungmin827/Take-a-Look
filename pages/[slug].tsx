@@ -66,7 +66,7 @@ export default function EssayPage({ essay, mdxSource }: Props) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = getAllSlugs()
+  const slugs = await getAllSlugs()
   return {
     paths: slugs.map(slug => ({ params: { slug } })),
     fallback: false,

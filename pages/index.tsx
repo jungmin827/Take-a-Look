@@ -43,6 +43,6 @@ export default function Home({ essays }: Props) {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const essays = getAllEssays()
+  const essays = await getAllEssays()
   return { props: { essays } }
 }
