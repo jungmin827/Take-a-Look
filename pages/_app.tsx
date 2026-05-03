@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app'
 import { Noto_Sans_KR } from 'next/font/google'
 import '@/styles/globals.css'
+import Navbar from '@/components/Navbar'
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
@@ -11,6 +12,7 @@ const notoSansKR = Noto_Sans_KR({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div className={notoSansKR.className}>
+      <Navbar />
       <Component {...pageProps} />
     </div>
   )
