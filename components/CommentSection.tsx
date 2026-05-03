@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface CommentNode {
   id: string
@@ -120,12 +120,12 @@ export default function CommentSection({ essayId }: Props) {
   const [body, setBody] = useState('')
   const [error, setError] = useState('')
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const res = await fetch(`/api/comments?essayId=${essayId}`)
     if (res.ok) setComments(await res.json())
-  }
+  }, [essayId])
 
-  useEffect(() => { load() }, [essayId])
+  useEffect(() => { load() }, [load])
 
   const submit = async () => {
     setError('')
