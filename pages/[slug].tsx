@@ -1,21 +1,21 @@
-import { GetStaticPaths, GetStaticProps } from 'next'
+import { GetServerSideProps } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
-import fs from 'fs'
-import path from 'path'
-import matter from 'gray-matter'
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
-import { serialize } from 'next-mdx-remote/serialize'
+import dynamic from 'next/dynamic'
 import { Essay } from '@/types'
-import { getAllSlugs } from '@/lib/essays'
+import { getEssayBySlug, getRelatedEssays } from '@/lib/essays'
 import TagChip from '@/components/TagChip'
+import HorizontalScroll from '@/components/HorizontalScroll'
+import CommentSection from '@/components/CommentSection'
+
+const EditorViewer = dynamic(() => import('@/components/EditorViewer'), { ssr: false })
 
 interface Props {
   essay: Essay
-  mdxSource: MDXRemoteSerializeResult
+  related: Essay[]
 }
 
-export default function EssayPage({ essay, mdxSource }: Props) {
+export default function EssayPage({ essay, related }: Props) {
   return (
     <>
       <Head>
@@ -47,43 +47,38 @@ export default function EssayPage({ essay, mdxSource }: Props) {
 
         <header className="mb-8">
           <div className="flex flex-wrap gap-2 mb-4">
-            {essay.tags.map(tag => (
-              <TagChip key={tag} tag={tag} />
-            ))}
+            {essay.tags.map(tag => <TagChip key={tag} tag={tag} />)}
           </div>
           <h1 className="text-3xl font-bold leading-tight mb-3">{essay.title}</h1>
           <p className="text-gray-400 text-sm">
-            {essay.date} · {essay.readingTime}
+            {essay.date.slice(0, 10)} · {essay.readingTime}
           </p>
         </header>
 
-        <article className="prose prose-gray max-w-none">
-          <MDXRemote {...mdxSource} />
+        <article>
+          <EditorViewer content={essay.content} />
         </article>
+
+        {related.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-lg font-bold mb-4">관련 글</h2>
+            <HorizontalScroll essays={related} variant="strip" />
+          </section>
+        )}
+
+        <CommentSection essayId={essay.id} />
       </main>
     </>
   )
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const slugs = await getAllSlugs()
-  return {
-    paths: slugs.map(slug => ({ params: { slug } })),
-    fallback: false,
-  }
-}
-
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
   const slug = params?.slug as string
-  const filePath = path.join(process.cwd(), 'content', `${slug}.mdx`)
-  const fileContent = fs.readFileSync(filePath, 'utf-8')
-  const { data, content } = matter(fileContent)
-  const mdxSource = await serialize(content)
+  const essay = await getEssayBySlug(slug)
 
-  return {
-    props: {
-      essay: data as Essay,
-      mdxSource,
-    },
-  }
+  if (!essay || !essay.published) return { notFound: true }
+
+  const related = await getRelatedEssays(slug)
+
+  return { props: { essay, related } }
 }
