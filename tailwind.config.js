@@ -3,6 +3,13 @@ module.exports = {
   content: ['./pages/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      colors: {
+        ink: '#0a0a0a',
+        paper: '#f5f3ee',
+      },
+      fontFamily: {
+        serif: ['var(--font-serif)', '"Times New Roman"', 'serif'],
+      },
       keyframes: {
         'marquee-left': {
           '0%': { transform: 'translateX(0)' },

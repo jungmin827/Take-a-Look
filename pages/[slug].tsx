@@ -19,9 +19,9 @@ export default function EssayPage({ essay, related }: Props) {
   return (
     <>
       <Head>
-        <title>{essay.title} — 비주류</title>
+        <title>{essay.title} — Take a Look</title>
         <meta name="description" content={essay.excerpt} />
-        <meta property="og:title" content={`${essay.title} — 비주류`} />
+        <meta property="og:title" content={`${essay.title} — Take a Look`} />
         <meta property="og:description" content={essay.excerpt} />
         <meta property="og:image" content={`/og/${essay.slug}.png`} />
         <meta property="og:locale" content="ko_KR" />
@@ -42,7 +42,7 @@ export default function EssayPage({ essay, related }: Props) {
 
       <main className="max-w-2xl mx-auto px-4 py-12">
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 mb-8 block">
-          ← 비주류
+          ← Take a Look
         </Link>
 
         <header className="mb-8">
