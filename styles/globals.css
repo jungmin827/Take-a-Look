@@ -15,3 +15,106 @@
 @media (prefers-reduced-motion: reduce) {
   .marq-track { animation: none !important; }
 }
+
+/* ── Essay body: dark prose overrides ───────────────────────── */
+.prose-essay {
+  color: rgba(245, 243, 238, 0.82);
+  font-size: 17px;
+  line-height: 1.78;
+  letter-spacing: -0.01em;
+}
+
+.prose-essay p {
+  margin-bottom: 1.6em;
+}
+
+.prose-essay h2 {
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #f5f3ee;
+  margin-top: 3em;
+  margin-bottom: 0.8em;
+}
+
+.prose-essay h3 {
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 243, 238, 0.6);
+  margin-top: 2.4em;
+  margin-bottom: 0.6em;
+}
+
+.prose-essay a {
+  color: #f5f3ee;
+  text-decoration-color: rgba(245, 243, 238, 0.28);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+
+.prose-essay a:hover {
+  text-decoration-color: rgba(245, 243, 238, 0.75);
+}
+
+.prose-essay blockquote {
+  border-left: 1px solid rgba(245, 243, 238, 0.18);
+  padding-left: 20px;
+  margin-left: 0;
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.6;
+  color: rgba(245, 243, 238, 0.58);
+}
+
+.prose-essay blockquote p {
+  margin-bottom: 0;
+}
+
+.prose-essay strong {
+  color: #f5f3ee;
+  font-weight: 600;
+}
+
+.prose-essay em {
+  font-family: var(--font-serif, serif);
+  font-style: italic;
+  color: rgba(245, 243, 238, 0.72);
+}
+
+.prose-essay hr {
+  border: none;
+  height: 1px;
+  background: rgba(245, 243, 238, 0.1);
+  margin: 3em 0;
+}
+
+.prose-essay ul,
+.prose-essay ol {
+  padding-left: 1.4em;
+  color: rgba(245, 243, 238, 0.78);
+}
+
+.prose-essay li {
+  margin-bottom: 0.4em;
+}
+
+.prose-essay img {
+  width: 100%;
+  filter: grayscale(1);
+  opacity: 0.85;
+  margin: 2.5em 0;
+}
+
+.prose-essay code {
+  background: rgba(245, 243, 238, 0.06);
+  padding: 2px 6px;
+  font-size: 14px;
+  color: rgba(245, 243, 238, 0.72);
+  border-radius: 2px;
+}
