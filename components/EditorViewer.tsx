@@ -6,16 +6,17 @@ import Link from '@tiptap/extension-link'
 
 interface Props {
   content: string
+  className?: string
 }
 
-export default function EditorViewer({ content }: Props) {
+export default function EditorViewer({ content, className = 'prose prose-gray max-w-none' }: Props) {
   const editor = useEditor({
     extensions: [StarterKit, Typography, Image, Link],
     content: content ? JSON.parse(content) : undefined,
     editable: false,
     immediatelyRender: false,
     editorProps: {
-      attributes: { class: 'prose prose-gray max-w-none' },
+      attributes: { class: className },
     },
   })
 
