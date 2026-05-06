@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+import { useUser } from '@/lib/hooks/useUser'
 
 interface CommentNode {
   id: string
@@ -23,7 +25,6 @@ function ReplyForm({ essayId, parentId, onPosted, onCancel }: {
   onPosted: () => void
   onCancel: () => void
 }) {
-  const [name, setName] = useState('')
   const [body, setBody] = useState('')
   const [error, setError] = useState('')
 
@@ -32,7 +33,7 @@ function ReplyForm({ essayId, parentId, onPosted, onCancel }: {
     const res = await fetch('/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ essayId, authorName: name, body, parentId }),
+      body: JSON.stringify({ essayId, body, parentId }),
     })
     if (!res.ok) {
       const data = await res.json()
@@ -44,12 +45,6 @@ function ReplyForm({ essayId, parentId, onPosted, onCancel }: {
 
   return (
     <div className="mt-3 ml-4 space-y-2">
-      <input
-        className="w-full border border-gray-200 rounded px-3 py-1.5 text-sm"
-        placeholder="닉네임 (2자 이상)"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
       <textarea
         className="w-full border border-gray-200 rounded px-3 py-1.5 text-sm resize-none"
         rows={2}
@@ -71,10 +66,11 @@ function ReplyForm({ essayId, parentId, onPosted, onCancel }: {
   )
 }
 
-function CommentItem({ comment, essayId, onPosted }: {
+function CommentItem({ comment, essayId, onPosted, canReply }: {
   comment: CommentNode
   essayId: string
   onPosted: () => void
+  canReply: boolean
 }) {
   const [showReply, setShowReply] = useState(false)
 
@@ -85,12 +81,14 @@ function CommentItem({ comment, essayId, onPosted }: {
         <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
       </div>
       <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.body}</p>
-      <button
-        onClick={() => setShowReply(!showReply)}
-        className="text-xs text-gray-400 mt-1 hover:text-gray-600"
-      >
-        답글
-      </button>
+      {canReply && (
+        <button
+          onClick={() => setShowReply(!showReply)}
+          className="text-xs text-gray-400 mt-1 hover:text-gray-600"
+        >
+          답글
+        </button>
+      )}
 
       {showReply && (
         <ReplyForm
@@ -115,8 +113,8 @@ function CommentItem({ comment, essayId, onPosted }: {
 }
 
 export default function CommentSection({ essayId }: Props) {
+  const { user } = useUser()
   const [comments, setComments] = useState<CommentNode[]>([])
-  const [name, setName] = useState('')
   const [body, setBody] = useState('')
   const [error, setError] = useState('')
 
@@ -132,14 +130,13 @@ export default function CommentSection({ essayId }: Props) {
     const res = await fetch('/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ essayId, authorName: name, body }),
+      body: JSON.stringify({ essayId, body }),
     })
     if (!res.ok) {
       const data = await res.json()
       setError(data.error ?? '오류가 발생했습니다.')
       return
     }
-    setName('')
     setBody('')
     load()
   }
@@ -150,27 +147,32 @@ export default function CommentSection({ essayId }: Props) {
         댓글{comments.length > 0 ? ` (${comments.length})` : ''}
       </h2>
 
-      <div className="space-y-2 mb-8">
-        <input
-          className="w-full border border-gray-200 rounded px-3 py-2 text-sm"
-          placeholder="닉네임 (2자 이상)"
-          value={name}
-          onChange={e => setName(e.target.value)}
-        />
-        <textarea
-          className="w-full border border-gray-200 rounded px-3 py-2 text-sm resize-none"
-          rows={3}
-          placeholder="댓글을 입력하세요 (5~500자)"
-          value={body}
-          onChange={e => setBody(e.target.value)}
-        />
-        {error && <p className="text-red-500 text-xs">{error}</p>}
-        <button
-          onClick={submit}
-          className="bg-gray-900 text-white text-sm px-4 py-2 rounded"
-        >
-          댓글 작성
-        </button>
+      <div className="mb-8">
+        {user ? (
+          <div className="space-y-2">
+            <p className="text-xs text-gray-400">{user.email?.split('@')[0]} 으로 작성됩니다</p>
+            <textarea
+              className="w-full border border-gray-200 rounded px-3 py-2 text-sm resize-none"
+              rows={3}
+              placeholder="댓글을 입력하세요 (5~500자)"
+              value={body}
+              onChange={e => setBody(e.target.value)}
+            />
+            {error && <p className="text-red-500 text-xs">{error}</p>}
+            <button
+              onClick={submit}
+              className="bg-gray-900 text-white text-sm px-4 py-2 rounded"
+            >
+              댓글 작성
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 py-4 border border-gray-100 rounded px-4 text-center">
+            댓글을 작성하려면{' '}
+            <Link href="/login" className="text-gray-900 font-medium hover:underline">로그인</Link>
+            {' '}이 필요합니다.
+          </p>
+        )}
       </div>
 
       <div>
@@ -178,7 +180,7 @@ export default function CommentSection({ essayId }: Props) {
           <p className="text-gray-400 text-sm text-center py-8">첫 댓글을 남겨보세요.</p>
         ) : (
           comments.map(c => (
-            <CommentItem key={c.id} comment={c} essayId={essayId} onPosted={load} />
+            <CommentItem key={c.id} comment={c} essayId={essayId} onPosted={load} canReply={!!user} />
           ))
         )}
       </div>

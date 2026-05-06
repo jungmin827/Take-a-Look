@@ -23,6 +23,7 @@ function BigCard({
 }) {
   const category = essay.tags[0]?.toUpperCase() ?? 'ESSAY'
   const displayNum = String(index + 1).padStart(2, '0')
+  const [imgError, setImgError] = useState(false)
 
   return (
     <Link
@@ -32,15 +33,18 @@ function BigCard({
       className="relative block overflow-hidden cursor-pointer bg-ink flex-none"
       style={{ width: 480, height: '100%', marginRight: 12 }}
     >
-      <Image
-        src={essay.coverImage}
-        alt={essay.alt}
-        fill
-        className="object-cover grayscale"
-        style={{ opacity: isHover ? 0.85 : 0.65, transition: 'opacity 0.4s' }}
-        sizes="480px"
-        priority={index < 3}
-      />
+      {!imgError && (
+        <Image
+          src={essay.coverImage}
+          alt={essay.alt}
+          fill
+          className="object-cover grayscale"
+          style={{ opacity: isHover ? 0.85 : 0.65, transition: 'opacity 0.4s' }}
+          sizes="480px"
+          priority={index < 3}
+          onError={() => setImgError(true)}
+        />
+      )}
       {/* Giant index number with mix-blend-mode: difference */}
       <div
         aria-hidden
@@ -135,6 +139,7 @@ function SlimCard({
   const category = essay.tags[0]?.toUpperCase() ?? 'ESSAY'
   const displayNum = String(index + 1).padStart(2, '0')
   const date = essay.date.slice(0, 10).replace(/-/g, '.')
+  const [imgError, setImgError] = useState(false)
 
   return (
     <Link
@@ -146,18 +151,21 @@ function SlimCard({
     >
       {/* Thumbnail */}
       <div className="relative flex-none bg-ink" style={{ width: 100 }}>
-        <Image
-          src={essay.coverImage}
-          alt={essay.alt}
-          fill
-          style={{
-            objectFit: 'cover',
-            filter: 'grayscale(1) contrast(1.1)',
-            opacity: isHover ? 1 : 0.85,
-            transition: 'opacity 0.3s',
-          }}
-          sizes="100px"
-        />
+        {!imgError && (
+          <Image
+            src={essay.coverImage}
+            alt={essay.alt}
+            fill
+            style={{
+              objectFit: 'cover',
+              filter: 'grayscale(1) contrast(1.1)',
+              opacity: isHover ? 1 : 0.85,
+              transition: 'opacity 0.3s',
+            }}
+            sizes="100px"
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
       {/* Text area */}
       <div
@@ -287,22 +295,30 @@ export default function MainHeroMarquee({ essays }: Props) {
         </div>
       </div>
 
-      {/* Top-right: Tagline */}
-      <div
-        className="absolute z-10 text-right font-serif italic"
-        style={{
-          top: 32,
-          right: 30,
-          fontSize: 16,
-          lineHeight: 1.35,
-          color: 'rgba(245,243,238,0.7)',
-          maxWidth: 280,
-        }}
-      >
-        내가 왜 이걸
-        <br />
-        파게 됐는지를 씁니다.
-      </div>
+      {/* Top-right: Nav */}
+      <nav className="absolute z-10 flex items-center" style={{ top: 28, right: 30, gap: 24 }}>
+        {[
+          { label: '글쓰기', href: '/admin/write' },
+          { label: '로그인', href: '/admin' },
+          { label: '회원가입', href: '/signup' },
+        ].map(({ label, href }) => (
+          <Link
+            key={label}
+            href={href}
+            className="font-sans font-medium uppercase"
+            style={{
+              fontSize: 10,
+              letterSpacing: '0.2em',
+              color: 'rgba(245,243,238,0.45)',
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'rgba(245,243,238,0.85)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(245,243,238,0.45)')}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
 
       {/* Bottom-right: HUD */}
       <div
