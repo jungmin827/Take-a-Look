@@ -13,9 +13,9 @@ export default function Home({ essays }: Props) {
     <>
       <Head>
         <title>Take a Look</title>
-        <meta name="description" content="취향 에세이 플랫폼 — 내가 왜 이걸 파게 됐는지를 씁니다" />
+        <meta name="description" content="넓고 얕은 지식을 탐구하는 공간" />
         <meta property="og:title" content="Take a Look" />
-        <meta property="og:description" content="취향 에세이 플랫폼 — 내가 왜 이걸 파게 됐는지를 씁니다" />
+        <meta property="og:description" content="넓고 얕은 지식을 탐구하는 공간" />
         <meta property="og:locale" content="ko_KR" />
       </Head>
       <main style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
