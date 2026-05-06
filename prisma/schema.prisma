@@ -45,5 +45,6 @@ model Comment {
   authorName String
   body       String
   parentId   String?
+  userId     String?
   createdAt  DateTime @default(now())
 }
