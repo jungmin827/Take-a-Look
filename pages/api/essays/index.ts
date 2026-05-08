@@ -37,6 +37,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         },
       })
+
+      // 임베딩 생성 (실패해도 에세이 저장은 성공 처리)
+      try {
+        const { generateChunkEmbeddings } = await import('@/lib/embedding')
+        const { upsertEssayEmbeddings } = await import('@/lib/supabase-vector')
+        const chunks = await generateChunkEmbeddings(essay.content)
+        await upsertEssayEmbeddings(essay.id, chunks)
+      } catch (embeddingErr) {
+        console.error('[embedding] non-fatal error:', embeddingErr)
+      }
+
       return res.status(201).json(essay)
     } catch (err: any) {
       if (err?.code === 'P2002') {
