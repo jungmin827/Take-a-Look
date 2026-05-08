@@ -33,6 +33,7 @@
     "jsonwebtoken": "^9.0.3",
     "next": "^14.2.0",
     "next-mdx-remote": "^4.4.1",
+    "openai": "^6.37.0",
     "prisma": "^7.8.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
