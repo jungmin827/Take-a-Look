@@ -8,6 +8,7 @@ import { getEssayBySlug, getRelatedEssays } from '@/lib/essays'
 import CommentSection from '@/components/CommentSection'
 
 const EditorViewer = dynamic(() => import('@/components/EditorViewer'), { ssr: false })
+const VoiceChat = dynamic(() => import('@/components/VoiceChat'), { ssr: false })
 
 interface Props {
   essay: Essay
@@ -339,6 +340,9 @@ export default function EssayPage({ essay, related }: Props) {
         >
           <CommentSection essayId={essay.id} />
         </div>
+
+        {/* ── VOICE CHAT ────────────────────────────────────────── */}
+        <VoiceChat slug={essay.slug} />
 
         {/* ── FOOTER ────────────────────────────────────────────── */}
         <div
