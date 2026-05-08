@@ -178,6 +178,7 @@ export default function VoiceChat({ slug }: Props) {
       ws.onclose = () => {
         if (statusRef.current === 'connected' && retryRef.current < 3) {
           retryRef.current++
+          stopAudio()
           setTimeout(() => connect(), 1500)
         } else if (statusRef.current !== 'idle') {
           updateStatus('error')

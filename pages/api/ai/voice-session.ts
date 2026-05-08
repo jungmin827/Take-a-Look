@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getEssayBySlug } from '@/lib/essays-db'
 import { extractTextFromTipTap } from '@/lib/embedding'
+import { rateLimit } from '@/lib/rate-limit'
 
 const MAX_WORDS = 3000 // ~4000 토큰
 
@@ -8,6 +9,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
     return res.status(405).end()
+  }
+
+  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ?? req.socket.remoteAddress ?? 'unknown'
+  if (!rateLimit(ip, 10, 60_000)) {
+    return res.status(429).json({ error: 'Too many requests' })
   }
 
   const { slug } = req.body
@@ -61,6 +67,10 @@ ${truncated}`
   }
 
   const data = await response.json()
+  if (!data?.client_secret?.value) {
+    console.error('[voice-session] Unexpected OpenAI response:', JSON.stringify(data))
+    return res.status(502).json({ error: 'Voice session creation failed' })
+  }
   return res.status(200).json({
     client_secret: data.client_secret.value,
     session_id: data.id,
