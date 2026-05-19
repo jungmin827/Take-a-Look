@@ -1,7 +1,9 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
+import * as path from 'path'
+dotenv.config({ path: path.resolve(process.cwd(), '.env') })
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') })
 import Anthropic from '@anthropic-ai/sdk'
 import * as fs from 'fs'
-import * as path from 'path'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
