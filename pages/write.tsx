@@ -8,11 +8,38 @@ import { uploadCoverImage } from '@/lib/upload-image'
 
 const Editor = dynamic(() => import('@/components/Editor'), { ssr: false })
 
+function extractExcerpt(contentJson: string): string {
+  if (!contentJson) return ''
+  try {
+    const doc = JSON.parse(contentJson)
+    for (const node of doc.content ?? []) {
+      if (node.type === 'paragraph') {
+        const text = (node.content ?? [])
+          .filter((c: any) => c.type === 'text')
+          .map((c: any) => c.text)
+          .join('')
+          .trim()
+        if (text) return text.slice(0, 120)
+      }
+    }
+  } catch {}
+  return ''
+}
+
+function generateSlug(title: string): string {
+  const base = title.trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w가-힣-]/g, '')
+    .toLowerCase()
+    .slice(0, 40)
+  const suffix = Date.now().toString(36).slice(-4)
+  return base ? `${base}-${suffix}` : suffix
+}
+
 export default function WritePage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
-  const [slug, setSlug] = useState('')
-  const [excerpt, setExcerpt] = useState('')
+  const [slugRef] = useState({ current: '' })
   const [coverImage, setCoverImage] = useState('')
   const [alt, setAlt] = useState('')
   const [tagsInput, setTagsInput] = useState('')
@@ -22,6 +49,13 @@ export default function WritePage() {
   const [status, setStatus] = useState('')
   const [uploading, setUploading] = useState(false)
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>()
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value)
+    if (!essayId) {
+      slugRef.current = generateSlug(value)
+    }
+  }
 
   const autoSave = useCallback((newContent: string, id: string) => {
     clearTimeout(saveTimeout.current)
@@ -58,8 +92,12 @@ export default function WritePage() {
   }
 
   const save = async (published: boolean) => {
+    const slug = slugRef.current || generateSlug(title || 'untitled')
+    slugRef.current = slug
+
     const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean)
-    const body = { slug, title, excerpt, coverImage, alt, content, readingTime, published, tags }
+    const excerpt = extractExcerpt(content)
+    const body = { slug, title, excerpt, coverImage, alt: alt || title, content, readingTime, published, tags }
 
     if (essayId) {
       await fetch(`/api/essays/${essayId}`, {
@@ -82,10 +120,7 @@ export default function WritePage() {
   }
 
   const fields = [
-    { placeholder: '제목', value: title, onChange: setTitle },
-    { placeholder: '슬러그 (URL, 예: my-essay)', value: slug, onChange: setSlug },
-    { placeholder: '요약', value: excerpt, onChange: setExcerpt },
-    { placeholder: '이미지 alt 텍스트', value: alt, onChange: setAlt },
+    { placeholder: '제목', value: title, onChange: handleTitleChange },
     { placeholder: '태그 (쉼표 구분, 예: 음악,음반)', value: tagsInput, onChange: setTagsInput },
     { placeholder: '읽기 시간 (예: 5분)', value: readingTime, onChange: setReadingTime },
   ]
@@ -123,7 +158,6 @@ export default function WritePage() {
         />
       ))}
 
-      {/* 커버 이미지 업로드 */}
       <div className="border border-gray-200 rounded p-3 space-y-2">
         <label className="text-sm text-gray-500">커버 이미지</label>
         <input
