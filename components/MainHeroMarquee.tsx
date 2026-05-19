@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { supabase } from '@/lib/supabase'
 import { Essay } from '@/types'
 import MarqueeLane from './MarqueeLane'
 
@@ -204,6 +206,18 @@ function SlimCard({
 export default function MainHeroMarquee({ essays }: Props) {
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [activeIdx, setActiveIdx] = useState(0)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
   const total = essays.length
   const paused = hoverId !== null
 
@@ -297,27 +311,64 @@ export default function MainHeroMarquee({ essays }: Props) {
 
       {/* Top-right: Nav */}
       <nav className="absolute z-10 flex items-center" style={{ top: 28, right: 30, gap: 24 }}>
-        {[
-          { label: '글쓰기', href: '/admin/write' },
-          { label: '로그인', href: '/admin' },
-          { label: '회원가입', href: '/signup' },
-        ].map(({ label, href }) => (
-          <Link
-            key={label}
-            href={href}
-            className="font-sans font-medium uppercase"
-            style={{
-              fontSize: 10,
-              letterSpacing: '0.2em',
-              color: 'rgba(245,243,238,0.45)',
-              transition: 'color 0.2s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'rgba(245,243,238,0.85)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(245,243,238,0.45)')}
-          >
-            {label}
-          </Link>
-        ))}
+        {(() => {
+          const navStyle: React.CSSProperties = {
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            color: 'rgba(245,243,238,0.45)',
+            transition: 'color 0.2s',
+          }
+          const hoverOn = (e: React.MouseEvent<HTMLElement>) =>
+            (e.currentTarget.style.color = 'rgba(245,243,238,0.85)')
+          const hoverOff = (e: React.MouseEvent<HTMLElement>) =>
+            (e.currentTarget.style.color = 'rgba(245,243,238,0.45)')
+
+          return (
+            <>
+              <Link
+                href="/write"
+                className="font-sans font-medium uppercase"
+                style={navStyle}
+                onMouseEnter={hoverOn}
+                onMouseLeave={hoverOff}
+              >
+                글쓰기
+              </Link>
+              {isLoggedIn ? (
+                <button
+                  onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
+                  className="font-sans font-medium uppercase"
+                  style={{ ...navStyle, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  onMouseEnter={hoverOn}
+                  onMouseLeave={hoverOff}
+                >
+                  로그아웃
+                </button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="font-sans font-medium uppercase"
+                    style={navStyle}
+                    onMouseEnter={hoverOn}
+                    onMouseLeave={hoverOff}
+                  >
+                    로그인
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="font-sans font-medium uppercase"
+                    style={navStyle}
+                    onMouseEnter={hoverOn}
+                    onMouseLeave={hoverOff}
+                  >
+                    회원가입
+                  </Link>
+                </>
+              )}
+            </>
+          )
+        })()}
       </nav>
 
       {/* Bottom-right: HUD */}
