@@ -121,8 +121,8 @@ export default function VoiceChat({ slug }: Props) {
       nextPlayTimeRef.current = audioCtx.currentTime
 
       const ws = new WebSocket(
-        'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview',
-        ['realtime', `openai-insecure-api-key.${client_secret}`, 'openai-beta.realtime-v1']
+        'wss://api.openai.com/v1/realtime?model=gpt-realtime-2',
+        ['realtime', `openai-insecure-api-key.${client_secret}`]
       )
       wsRef.current = ws
 
